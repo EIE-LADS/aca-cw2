@@ -1,5 +1,6 @@
-#CFLAGS=-g -std=c++11 
-CFLAGS=-O3 -std=c++11 
+CFLAGS=-g -std=c++11 
+#CFLAGS=-O3 -std=c++11 
+#CFLAGS=-O3 -std=c++11 -mcmodel=medium
 PFLAGS=-ltbb
 VERS=
 
