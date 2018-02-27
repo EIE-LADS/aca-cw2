@@ -340,9 +340,16 @@ void Table::pagerank() {
             old_pr = pr;
         } else {
             /* Normalize so that we start with sum equal to one */
-            for (i = 0; i < pr.size(); i++) {
-                old_pr[i] = pr[i] / sum_pr;
-            }
+            tbb::parallel_for(
+                tbb::blocked_range<size_t>(0,pr.size()), 
+                [&](const tbb::blocked_range<size_t>& r)
+                {
+                    for (size_t i=r.begin(); i!=r.end(); ++i)
+                    {
+                        old_pr[i] = pr[i] / sum_pr;
+                    }
+                }
+            );
         }
 
         /* An element of the A x I vector; all elements are identical */

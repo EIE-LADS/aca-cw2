@@ -242,8 +242,36 @@ int Table::read_file(const string &filename) {
         delete infile;
     }
     reserve(idx_to_nodes.size());
-    
+   
+    flatten_rows();
+
     return 0;
+}
+
+void Table::flatten_rows(){
+    unsigned long total_size = 0;
+    unsigned size;
+    vers="6";
+    col_ptrs = new size_t*[rows.size()];
+    col_size = new unsigned[rows.size()];
+
+    for(int i=0; i<rows.size(); i++){
+        size = rows[i].size();
+        total_size += size;
+        col_size[i] = size;
+    }
+
+    flat_array = new size_t[total_size];
+    size_t *array_fill_ptr = flat_array;
+
+    for(int i=0; i<rows.size(); i++){
+        col_ptrs[i] = NULL;
+        for(int j=0; j<rows[i].size(); j++){
+            if(j==0) col_ptrs[i] = array_fill_ptr;
+            array_fill_ptr[0] = rows[i][j];
+            array_fill_ptr++;
+        }
+    }
 }
 
 /*
@@ -340,9 +368,16 @@ void Table::pagerank() {
             old_pr = pr;
         } else {
             /* Normalize so that we start with sum equal to one */
-            for (i = 0; i < pr.size(); i++) {
-                old_pr[i] = pr[i] / sum_pr;
-            }
+            tbb::parallel_for(
+                tbb::blocked_range<size_t>(0,pr.size()), 
+                [&](const tbb::blocked_range<size_t>& r)
+                {
+                    for (size_t i=r.begin(); i!=r.end(); ++i)
+                    {
+                        old_pr[i] = pr[i] / sum_pr;
+                    }
+                }
+            );
         }
 
         /* An element of the A x I vector; all elements are identical */
@@ -365,27 +400,31 @@ void Table::pagerank() {
             acc1, 
             [&](const tbb::blocked_range<size_t>& r, Acc init)->Acc
             {
-                for (size_t tmp=r.begin(); tmp!=r.end(); tmp++)
+                for (size_t ri=r.begin(); ri!=r.end(); ri++)
                 {
                     double h = 0.0;
+                    size_t col_entry;
+                    size_t *col_ptr = col_ptrs[ri];
 
-                    for (ci = rows[tmp].begin(); ci != rows[tmp].end(); ci++) {
+                    for (unsigned ci = 0; ci < col_size[ri]; ci++) {
+                        col_entry = col_ptr[ci];
+
                         /* The current element of the H vector */
-                        double h_v = (num_outgoing[*ci])
-                            ? 1.0 / num_outgoing[*ci]
+                        double h_v = (num_outgoing[col_entry])
+                            ? 1.0 / num_outgoing[col_entry]
                             : 0.0;
                         // if (num_iterations == 0 && trace) {
-                        //     cout << "h[" << tmp << "," << *ci << "]=" << h_v << endl;
+                        //     cout << "h[" << ri << "," << *ci << "]=" << h_v << endl;
                         // }
-                       	h += h_v * old_pr[*ci];
+                       	h += h_v * old_pr[col_entry];
                     }
 
                     h *= alpha;
-                    pr[tmp] = h + one_Av + one_Iv;
-                    init.diff += fabs(pr[tmp] - old_pr[tmp]);
-	                init.sum_pr_new += pr[tmp];
-                    if (num_outgoing[tmp] == 0) {
-                        init.dangling_pr_new += pr[tmp];
+                    pr[ri] = h + one_Av + one_Iv;
+                    init.diff += fabs(pr[ri] - old_pr[ri]);
+	                init.sum_pr_new += pr[ri];
+                    if (num_outgoing[ri] == 0) {
+                        init.dangling_pr_new += pr[ri];
                     }
                 }
 

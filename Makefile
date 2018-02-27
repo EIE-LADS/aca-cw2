@@ -1,29 +1,30 @@
-CFLAGS=-O3
+#CFLAGS=-g -std=c++11 
+CFLAGS=-O3 -std=c++11 
 PFLAGS=-ltbb
+VERS=
 
-
-pagerank_test: pagerank_test.cpp table.cpp pagerank.cpp table.h
-	g++ $(CFLAGS) -o pagerank_test pagerank_test.cpp table.cpp $(PFLAGS)
-pagerank: pagerank.cpp table.cpp table.h
-	g++ $(CFLAGS) -Wall -o pagerank pagerank.cpp table.cpp $(PFLAGS) 
+pagerank_test : pagerank_test.cpp table$(VERS).cpp pagerank.cpp table.h 
+	g++ $(CFLAGS) -o pagerank_test$(VERS)_exe  pagerank_test.cpp table$(VERS).cpp $(PFLAGS)
+pagerank : pagerank.cpp table.cpp table.h
+	g++ $(CFLAGS) -Wall -o pagerank$(VERS)_exe pagerank.cpp table.cpp 
 
 all-tests: all-tests.txt pagerank_test
-	./pagerank_test all-tests.txt
+	./pagerank_test$(VERS)_exe  all-tests.txt
 
 small-test: small pagerank_test
 	./pagerank_test small
 
 medium-test: medium pagerank_test
-	./pagerank_test medium
+	./pagerank_test$(VERS)_exe  medium
 
 large-test: large pagerank_test
-	./pagerank_test large
+	./pagerank_test$(VERS)_exe  large
 
 enormous-test: enormous pagerank_test
-	./pagerank_test enormous
+	./pagerank_test$(VERS)_exe  enormous
 
 ginormous-test: ginormous pagerank_test
-	./pagerank_test ginormous
+	./pagerank_test$(VERS)_exe  ginormous
 
 clean:
-	rm -f pagerank pagerank_test
+	rm -f *_exe
