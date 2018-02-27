@@ -19,6 +19,7 @@ medium-test: medium pagerank_test
 	./pagerank_test$(VERS)_exe  medium
 
 large-test: large pagerank_test
+	ulimit -s 131072
 	./pagerank_test$(VERS)_exe  large
 
 enormous-test: enormous pagerank_test
