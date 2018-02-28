@@ -1,5 +1,5 @@
-CFLAGS=-g -std=c++11 
-#CFLAGS=-O3 -std=c++11 
+#CFLAGS=-g -std=c++11 
+CFLAGS=-O3 -std=c++11 
 #CFLAGS=-O3 -std=c++11 -mcmodel=medium
 PFLAGS=-ltbb
 VERS=
@@ -19,7 +19,6 @@ medium-test: medium pagerank_test
 	./pagerank_test$(VERS)_exe  medium
 
 large-test: large pagerank_test
-	ulimit -s 131072
 	./pagerank_test$(VERS)_exe  large
 
 enormous-test: enormous pagerank_test
