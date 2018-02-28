@@ -322,8 +322,8 @@ void Table::pagerank() {
     }
     
     while (diff > convergence && num_iterations < max_iterations) {
-	double sum_pr_new = 0;
-	double dangling_pr_new = 0;
+	    double sum_pr_new = 0;
+	    double dangling_pr_new = 0;
 
         if (num_iterations == 0) {
             old_pr = pr;
@@ -361,7 +361,7 @@ void Table::pagerank() {
             h *= alpha;
             pr[i] = h + one_Av + one_Iv;
             diff += fabs(pr[i] - old_pr[i]);
-	    sum_pr_new += pr[i];
+	        sum_pr_new += pr[i];
             if (num_outgoing[i] == 0) {
                 dangling_pr_new += pr[i];
             }

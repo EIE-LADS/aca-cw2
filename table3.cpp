@@ -323,13 +323,13 @@ void Table::pagerank() {
     }
     
     while (diff > convergence && num_iterations < max_iterations) {
-	double sum_pr_new = 0;
-	double dangling_pr_new = 0;
+	    double sum_pr_new = 0;
+	    double dangling_pr_new = 0;
 
         if (num_iterations == 0) {
             old_pr = pr;
-	    old_pr_new = old_pr;
-	}
+	        old_pr_new = old_pr;
+	    }
         // } else {
         //     /* Normalize so that we start with sum equal to one */
         //     for (i = 0; i < pr.size(); i++) {
@@ -364,16 +364,16 @@ void Table::pagerank() {
             h *= alpha;
             pr[i] = h + one_Av + one_Iv;
             diff += fabs(pr[i] - old_pr[i]/sum_pr);
-	    old_pr_new[i] = pr[i];
-	    sum_pr_new += pr[i];
+	        old_pr_new[i] = pr[i];
+	        sum_pr_new += pr[i];
             if (num_outgoing[i] == 0) {
                 dangling_pr_new += pr[i];
             }
         }
 
-	dangling_pr = dangling_pr_new;
-	sum_pr = sum_pr_new;		
-	old_pr.swap(old_pr_new);
+	    dangling_pr = dangling_pr_new;
+	    sum_pr = sum_pr_new;		
+	    old_pr.swap(old_pr_new);
 
         num_iterations++;
         if (trace) {
