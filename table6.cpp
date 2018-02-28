@@ -329,6 +329,7 @@ struct Acc
 
 void Table::pagerank() {
 
+    auto schedule = init_tbb();
     vector<size_t>::iterator ci; // current incoming
     double diff = 1;
     size_t i;
@@ -451,7 +452,7 @@ void Table::pagerank() {
             print_pagerank();
         }
     }
-    
+    delete schedule;    
 }
 
 const void Table::print_params(ostream& out) {

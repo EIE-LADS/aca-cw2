@@ -45,10 +45,6 @@
 
 #include "table.h"
 
-#include "tbb/parallel_for.h"
-#include "tbb/parallel_reduce.h"
-#include "tbb/blocked_range.h"
-
 void Table::reset() {
     num_outgoing.clear();
     rows.clear();
@@ -292,13 +288,6 @@ bool Table::add_arc(size_t from, size_t to) {
     return ret;
 }
 
-struct Acc
-{
-    double diff; 
-    double sum_pr_new; 
-    double dangling_pr_new; 
-};
-
 void Table::pagerank() {
 
     vector<size_t>::iterator ci; // current incoming
@@ -323,96 +312,60 @@ void Table::pagerank() {
     if (trace) {
         print_pagerank();
     }
-            
-    sum_pr = 1;
-    for (size_t k = 0; k < pr.size(); k++) {
-        double cpr = pr[k];
-        if (num_outgoing[k] == 0) {
-            dangling_pr += cpr;
-        }
-    }
     
     while (diff > convergence && num_iterations < max_iterations) {
-	    double sum_pr_new = 0;
-	    double dangling_pr_new = 0;
+
+        sum_pr = 0;
+        dangling_pr = 0;
+        
+        for (size_t k = 0; k < pr.size(); k++) {
+            double cpr = pr[k];
+            sum_pr += cpr;
+            if (num_outgoing[k] == 0) {
+                dangling_pr += cpr;
+            }
+        }
 
         if (num_iterations == 0) {
             old_pr = pr;
         } else {
             /* Normalize so that we start with sum equal to one */
-            tbb::parallel_for(
-                tbb::blocked_range<size_t>(0,pr.size()), 
-                [&](const tbb::blocked_range<size_t>& r)
-                {
-                    for (size_t i=r.begin(); i!=r.end(); ++i)
-                    {
-                        old_pr[i] = pr[i] / sum_pr;
-                    }
-                }
-            );
+            for (i = 0; i < pr.size(); i++) {
+                old_pr[i] = pr[i] / sum_pr;
+            }
         }
 
+        /*
+         * After normalisation the elements of the pagerank vector sum
+         * to one
+         */
+        sum_pr = 1;
+        
         /* An element of the A x I vector; all elements are identical */
         double one_Av = alpha * dangling_pr / num_rows;
 
         /* An element of the 1 x I vector; all elements are identical */
-        double one_Iv = (1 - alpha) / num_rows;
+        double one_Iv = (1 - alpha) * sum_pr / num_rows;
 
         /* The difference to be checked for convergence */
         diff = 0;
-
-        Acc acc1; 
-        acc1.diff = 0; 
-        acc1.sum_pr_new = 0; 
-        acc1.dangling_pr_new = 0; 
-
-        Acc result = 
-        tbb::parallel_reduce(
-            tbb::blocked_range<size_t>(0, num_rows), 
-            acc1, 
-            [&](const tbb::blocked_range<size_t>& r, Acc init)->Acc
-            {
-                for (size_t tmp=r.begin(); tmp!=r.end(); tmp++)
-                {
-                    double h = 0.0;
-
-                    for (ci = rows[tmp].begin(); ci != rows[tmp].end(); ci++) {
-                        /* The current element of the H vector */
-                        double h_v = (num_outgoing[*ci])
-                            ? 1.0 / num_outgoing[*ci]
-                            : 0.0;
-                        // if (num_iterations == 0 && trace) {
-                        //     cout << "h[" << tmp << "," << *ci << "]=" << h_v << endl;
-                        // }
-                       	h += h_v * old_pr[*ci];
-                    }
-
-                    h *= alpha;
-                    pr[tmp] = h + one_Av + one_Iv;
-                    init.diff += fabs(pr[tmp] - old_pr[tmp]);
-	                init.sum_pr_new += pr[tmp];
-                    if (num_outgoing[tmp] == 0) {
-                        init.dangling_pr_new += pr[tmp];
-                    }
+        for (i = 0; i < num_rows; i++) {
+            /* The corresponding element of the H multiplication */
+            double h = 0.0;
+            for (ci = rows[i].begin(); ci != rows[i].end(); ci++) {
+                /* The current element of the H vector */
+                double h_v = (num_outgoing[*ci])
+                    ? 1.0 / num_outgoing[*ci]
+                    : 0.0;
+                if (num_iterations == 0 && trace) {
+                    cout << "h[" << i << "," << *ci << "]=" << h_v << endl;
                 }
-
-                return init; 
-            },
-            [&](Acc x, Acc y)->Acc 
-            {
-                Acc tmp; 
-                tmp.diff = x.diff + y.diff; 
-                tmp.sum_pr_new = x.sum_pr_new + y.sum_pr_new; 
-                tmp.dangling_pr_new = x.dangling_pr_new + y.dangling_pr_new; 
-
-                return tmp; 
+                h += h_v * old_pr[*ci];
             }
-        ); 
-
-	    dangling_pr = result.dangling_pr_new;
-	    sum_pr = result.sum_pr_new;		
-        diff = result.diff; 
-
+            h *= alpha;
+            pr[i] = h + one_Av + one_Iv;
+            diff += fabs(pr[i] - old_pr[i]);
+        }
         num_iterations++;
         if (trace) {
             cout << num_iterations << ": ";

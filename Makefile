@@ -4,8 +4,8 @@ CFLAGS=-O3 -std=c++11
 PFLAGS=-ltbb
 VERS=
 
-pagerank_test : pagerank_test.cpp table$(VERS).cpp pagerank.cpp table.h 
-	g++ $(CFLAGS) -o pagerank_test$(VERS)_exe  pagerank_test.cpp table$(VERS).cpp $(PFLAGS)
+pagerank_test : pagerank_test.cpp table$(VERS).cpp pagerank.cpp tbb_init.cpp table.h 
+	g++ $(CFLAGS) -o pagerank_test$(VERS)_exe  pagerank_test.cpp table$(VERS).cpp tbb_init.cpp $(PFLAGS)
 pagerank : pagerank.cpp table.cpp table.h
 	g++ $(CFLAGS) -Wall -o pagerank$(VERS)_exe pagerank.cpp table.cpp 
 

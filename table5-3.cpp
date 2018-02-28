@@ -301,6 +301,7 @@ struct Acc
 
 void Table::pagerank() {
 
+    auto schedule = init_tbb();
     double diff = 1;
     size_t i;
     double sum_pr; // sum of current pagerank vector elements
@@ -417,7 +418,7 @@ void Table::pagerank() {
             print_pagerank();
         }
     }
-    
+    delete schedule;    
 }
 
 const void Table::print_params(ostream& out) {

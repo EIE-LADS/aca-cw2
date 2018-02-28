@@ -32,11 +32,15 @@
    OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#ifndef TABLE_h
+#define TABLE_h
+
 #include <vector>
 #include <set>
 #include <map>
 #include <string>
 #include <list>
+#include "tbb/task_scheduler_init.h"
 
 using namespace std;
 
@@ -109,6 +113,10 @@ private:
      * WARNING: requires destruction of tables in destructor
      */
     void flatten_rows();
+
+    //Define number of threads to be used from variable ACA_NUM_THREADS
+    tbb::task_scheduler_init* init_tbb();
+    unsigned thread_limit;
     
 public:
     Table(double a = DEFAULT_ALPHA, double c = DEFAULT_CONVERGENCE,
@@ -285,3 +293,5 @@ public:
      */
     const void print_pagerank_v();
 };
+
+#endif
