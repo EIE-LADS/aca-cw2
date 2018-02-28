@@ -301,7 +301,6 @@ struct Acc
 
 void Table::pagerank() {
 
-    vector<size_t>::iterator ci; // current incoming
     double diff = 1;
     size_t i;
     double sum_pr; // sum of current pagerank vector elements
@@ -372,6 +371,7 @@ void Table::pagerank() {
             acc1, 
             [&](const tbb::blocked_range<size_t>& r, Acc init)->Acc
             {
+                vector<size_t>::iterator ci; // current incoming
                 for (size_t tmp=r.begin(); tmp!=r.end(); tmp++)
                 {
                     double h = 0.0;
