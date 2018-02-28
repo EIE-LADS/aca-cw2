@@ -117,6 +117,7 @@ private:
     //Define number of threads to be used from variable ACA_NUM_THREADS
     tbb::task_scheduler_init* init_tbb();
     unsigned thread_limit;
+    unsigned partition_size;
     
 public:
     Table(double a = DEFAULT_ALPHA, double c = DEFAULT_CONVERGENCE,

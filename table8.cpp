@@ -65,6 +65,10 @@ Table::Table(double a, double c, size_t i, bool t, bool n, string d)
       max_iterations(i),
       delim(d),
       numeric(n) {
+    char *v=getenv("ACA_PARTITION");
+    if(v==NULL) partition_size = 1;
+    else partition_size = atoi(v);
+    fprintf(stderr, "Partition size set to: %u\n", partition_size);
 }
 
 void Table::reserve(size_t size) {
@@ -333,6 +337,7 @@ struct Acc
 
 void Table::pagerank() {
 
+    auto schedule = init_tbb();
     double diff = 1;
     size_t i;
     double sum_pr; // sum of current pagerank vector elements
@@ -345,10 +350,8 @@ void Table::pagerank() {
         return;
     }
    
-    double pr_ptr[num_rows];
-    double old_pr_ptr[num_rows];
-    //alignas(CACHE_LINE_SIZE) double pr_ptr[num_rows];
-    //alignas(CACHE_LINE_SIZE) double old_pr_ptr[num_rows];
+    alignas(CACHE_LINE_SIZE) double pr_ptr[num_rows];
+    alignas(CACHE_LINE_SIZE) double old_pr_ptr[num_rows];
     
     //For double buffering but was crashing
     //double *pr_ptr, *old_pr_ptr;
@@ -372,7 +375,7 @@ void Table::pagerank() {
     }
     
     // comment back in for affinity
-    //tbb::affinity_partitioner parForAP, parReduceAP; 
+    tbb::affinity_partitioner parForAP, parReduceAP; 
     
     while (diff > convergence && num_iterations < max_iterations) {
 	    double sum_pr_new = 0;
@@ -382,7 +385,7 @@ void Table::pagerank() {
         {
             /* Normalize so that we start with sum equal to one */
             tbb::parallel_for(
-                tbb::blocked_range<size_t>(0,num_rows,DOUBLES_PER_LINE), 
+                tbb::blocked_range<size_t>(0,num_rows,DOUBLES_PER_LINE*partition_size), 
                 [&](const tbb::blocked_range<size_t>& r)
                 {
                     for (size_t i=r.begin(); i!=r.end(); ++i)
@@ -390,9 +393,9 @@ void Table::pagerank() {
                         old_pr_ptr[i] = pr_ptr[i] / sum_pr;
                     }
                 }
-                ,tbb::static_partitioner()
+                //,tbb::static_partitioner()
                 // comment back in for affinity
-                //,parForAP
+                ,parForAP
             );
         }
 
@@ -455,9 +458,9 @@ void Table::pagerank() {
 
                 return tmp; 
             }
-            ,tbb::static_partitioner()
+            //,tbb::static_partitioner()
             // comment back in for affinity
-            //,parReduceAP
+            ,parReduceAP
         ); 
 
 	    dangling_pr = result.dangling_pr_new;
@@ -470,7 +473,7 @@ void Table::pagerank() {
             print_pagerank();
         }
     }
-    
+    delete schedule;    
 }
 
 const void Table::print_params(ostream& out) {

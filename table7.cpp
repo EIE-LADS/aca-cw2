@@ -345,10 +345,8 @@ void Table::pagerank() {
         return;
     }
    
-    double pr_ptr[num_rows];
-    double old_pr_ptr[num_rows];
-    //alignas(CACHE_LINE_SIZE) double pr_ptr[num_rows];
-    //alignas(CACHE_LINE_SIZE) double old_pr_ptr[num_rows];
+    alignas(CACHE_LINE_SIZE) double pr_ptr[num_rows];
+    alignas(CACHE_LINE_SIZE) double old_pr_ptr[num_rows];
     
     //For double buffering but was crashing
     //double *pr_ptr, *old_pr_ptr;
