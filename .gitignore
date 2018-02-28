@@ -1,1 +1,5 @@
 *_exe
+*.sh 
+*.sh~
+*.csh 
+*.csh~

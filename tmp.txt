@@ -1,0 +1,4 @@
+g++ -O3 -o pagerank_test pagerank_test.cpp table.cpp
+./pagerank_test small
+testing against ../test/barabasi-50000-pr-p.txt... Pagerank time(s): 0.025838
+ OK

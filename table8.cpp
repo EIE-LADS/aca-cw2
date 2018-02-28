@@ -48,6 +48,7 @@
 #include "tbb/parallel_for.h"
 #include "tbb/parallel_reduce.h"
 #include "tbb/blocked_range.h"
+#include "tbb/partitioner.h"
 
 void Table::reset() {
     num_outgoing.clear();
@@ -370,6 +371,9 @@ void Table::pagerank() {
         old_pr_ptr[0] = 0;
     }
     
+    // comment back in for affinity
+    //tbb::affinity_partitioner parForAP, parReduceAP; 
+    
     while (diff > convergence && num_iterations < max_iterations) {
 	    double sum_pr_new = 0;
 	    double dangling_pr_new = 0;
@@ -378,16 +382,17 @@ void Table::pagerank() {
         {
             /* Normalize so that we start with sum equal to one */
             tbb::parallel_for(
-                // tbb::blocked_range<size_t>(0,num_rows,DOUBLES_PER_LINE), 
-                tbb::blocked_range<size_t>(0,num_rows), 
+                tbb::blocked_range<size_t>(0,num_rows,DOUBLES_PER_LINE), 
                 [&](const tbb::blocked_range<size_t>& r)
                 {
                     for (size_t i=r.begin(); i!=r.end(); ++i)
                     {
                         old_pr_ptr[i] = pr_ptr[i] / sum_pr;
                     }
-                },
-                tbb::affinity_partitioner()
+                }
+                ,tbb::static_partitioner()
+                // comment back in for affinity
+                //,parForAP
             );
         }
 
@@ -407,8 +412,7 @@ void Table::pagerank() {
 
         Acc result = 
         tbb::parallel_reduce(
-            //tbb::blocked_range<size_t>(0, num_rows, DOUBLES_PER_LINE), 
-            tbb::blocked_range<size_t>(0, num_rows), 
+            tbb::blocked_range<size_t>(0, num_rows, DOUBLES_PER_LINE), 
             acc1, 
             [&](const tbb::blocked_range<size_t>& r, Acc init)->Acc
             {
@@ -450,8 +454,10 @@ void Table::pagerank() {
                 tmp.dangling_pr_new = x.dangling_pr_new + y.dangling_pr_new; 
 
                 return tmp; 
-            },
-            tbb::affinity_partitioner()
+            }
+            ,tbb::static_partitioner()
+            // comment back in for affinity
+            //,parReduceAP
         ); 
 
 	    dangling_pr = result.dangling_pr_new;
