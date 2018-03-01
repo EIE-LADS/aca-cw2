@@ -396,6 +396,7 @@ void Table::pagerank() {
                         init.dangling_pr_new += pr[ri];
                     }
                 }
+                return init;
             },
             [&](Acc x, Acc y)->Acc 
             {
