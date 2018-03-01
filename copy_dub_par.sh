@@ -6,7 +6,9 @@ NUM_ITERS=5
 EXP_NUM_PROCESSORS=$NUM_PROCESSORS
 AVG=
 echo "cpuinfo shows ${NUM_PROCESSORS}x${PROCESSOR} processors" 1>&2
-FILE="results/${NUM_PROCESSORS}x${PROCESSOR}_`date +%d_%H_%M`.csv"
+FILE="/home/ubuntu/cpp/results/buffer/${NUM_PROCESSORS}x${PROCESSOR}_`date +%d_%H_%M`.csv"
+echo $FILE
+# FILE="./results/${NUM_PROCESSORS}x${PROCESSOR}_`date +%d_%H_%M`.csv"
 
 echo "processor, version, num_threads, iteration, time" >> $FILE
 for vers in "${VERSIONS[@]}"; do

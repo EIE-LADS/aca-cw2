@@ -1,0 +1,4 @@
+processor, version, num_threads, iteration, time
+ 36xmodel name	: Intel(R) Xeon(R) Platinum 8124M CPU @ 3.00GHz, 5, 1, 1, 
+ 36xmodel name	: Intel(R) Xeon(R) Platinum 8124M CPU @ 3.00GHz, 5, 1, 2, 
+ 36xmodel name	: Intel(R) Xeon(R) Platinum 8124M CPU @ 3.00GHz, 5, 1, 3, 
