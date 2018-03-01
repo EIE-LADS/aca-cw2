@@ -1,0 +1,10 @@
+g++ -O3 -std=c++11  -o pagerank_test6_exe  pagerank_test.cpp table6.cpp tbb_init.cpp -ltbb
+./pagerank_test6_exe  large
+median: 0
+num_zeros: 3333421
+avg: 1
+avg non-zeros: 3.00016
+median non-zeros: 2
+max 3: 4305, 2473, 2208, 
+Makefile:22: recipe for target 'large-test' failed
+make: *** [large-test] Segmentation fault

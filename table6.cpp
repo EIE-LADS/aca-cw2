@@ -248,6 +248,7 @@ int Table::read_file(const string &filename) {
     return 0;
 }
 
+#include <algorithm>
 void Table::flatten_rows(){
     unsigned long total_size = 0;
     unsigned size;
@@ -271,6 +272,33 @@ void Table::flatten_rows(){
             array_fill_ptr[0] = rows[i][j];
             array_fill_ptr++;
         }
+    }
+    
+    bool analize_cols = false;
+    if(analize_cols)
+    {
+        sort(col_size, col_size+rows.size());
+        cout << "median: " << col_size[rows.size()/2] << endl;
+        unsigned long sum =0;
+        bool zero_found = false;
+        unsigned num_zeros;
+        for(int i=0; i<rows.size(); i++)
+        {
+            if(!zero_found && col_size[i])
+            {
+                cout << "num_zeros: " << i << endl;
+                num_zeros = i;
+                zero_found = true;
+            }
+            else
+            {
+                sum += col_size[i];
+            }
+        }
+        cout << "avg: " << double(sum)/double(rows.size()) << endl;
+        cout << "avg non-zeros: " << double(sum)/double((rows.size()-num_zeros)) << endl;
+        cout << "median non-zeros: " << col_size[num_zeros + (rows.size() - num_zeros)/2]  << endl;
+        cout << "max 3: " << col_size[rows.size()-1] << ", " << col_size[rows.size()-2] << ", " << col_size[rows.size()-3] << ", " << endl;
     }
 }
 
