@@ -1,5 +1,10 @@
+.gitignore
 *_exe
 *.sh 
 *.sh~
 *.csh 
 *.csh~
+*.swp
+!scalability_vers.sh
+!run_timings.sh
+!copy_dub_par.sh

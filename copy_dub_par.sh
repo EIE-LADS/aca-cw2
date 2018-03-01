@@ -1,7 +1,7 @@
 #!/bin/bash
 NUM_PROCESSORS=`awk '/^processor/{n+=1}END{print n}' /proc/cpuinfo`
 PROCESSOR=`cat /proc/cpuinfo | grep "model name" | head -n 1 | sed -r "s/.* (i[0-9\-]+).*/\1/"`
-VERSIONS=(5 6 7 8)
+VERSIONS=('5', '5-2', '5-3')
 NUM_ITERS=5
 EXP_NUM_PROCESSORS=$NUM_PROCESSORS
 AVG=
