@@ -370,8 +370,8 @@ void Table::pagerank() {
             
     sum_pr = 1;
     for (size_t k = 1; k < num_rows; k++) {
-        pr_ptr[0] = 0;
-        old_pr_ptr[0] = 0;
+        pr_ptr[k] = 0;
+        old_pr_ptr[k] = 0;
     }
     
     // comment back in for affinity
